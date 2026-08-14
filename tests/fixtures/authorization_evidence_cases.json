@@ -1,0 +1,125 @@
+{
+  "now_utc": "2026-08-14T12:00:00Z",
+  "cases": [
+    {
+      "name": "valid_and_authorized",
+      "consumed_text": "{\"approval\":\"fulfillment-approved\",\"decision\":\"D-1001\"}",
+      "evidence": {
+        "decision_ref": "decision:D-1001",
+        "authorization_uri": "https://example.test/decisions/D-1001",
+        "authorization_sha256": "917239554183f6a15b6178f0e26d4ba783ca90ae50762b286c895dbba9da3e1c",
+        "scheme": "test-decision-v1",
+        "verifier_key_ref": "did:key:trusted-alpha",
+        "transport_hint": "raw_url",
+        "signature_valid": true,
+        "status": "active",
+        "valid_until": "2030-01-01T00:00:00Z"
+      },
+      "policy": {
+        "accepted_schemes": ["test-decision-v1"],
+        "authorized_keys": ["did:key:trusted-alpha"]
+      },
+      "expected_state": "valid_and_authorized"
+    },
+    {
+      "name": "sha256_mismatch",
+      "consumed_text": "{\"approval\":\"fulfillment-approved\",\"decision\":\"D-1001\"}",
+      "evidence": {
+        "decision_ref": "decision:D-1001",
+        "authorization_uri": "https://example.test/decisions/D-1001",
+        "authorization_sha256": "cd7b500c5bb4298688548784eb7c655d5b86b7782a0e9ce2b88f3d798da8d7b0",
+        "scheme": "test-decision-v1",
+        "verifier_key_ref": "did:key:trusted-alpha",
+        "transport_hint": "raw_url",
+        "signature_valid": true,
+        "status": "active",
+        "valid_until": "2030-01-01T00:00:00Z"
+      },
+      "policy": {
+        "accepted_schemes": ["test-decision-v1"],
+        "authorized_keys": ["did:key:trusted-alpha"]
+      },
+      "expected_state": "structurally_invalid"
+    },
+    {
+      "name": "expired_evidence",
+      "consumed_text": "{\"approval\":\"fulfillment-approved\",\"decision\":\"D-1001\"}",
+      "evidence": {
+        "decision_ref": "decision:D-1001",
+        "authorization_uri": "https://example.test/decisions/D-1001",
+        "authorization_sha256": "917239554183f6a15b6178f0e26d4ba783ca90ae50762b286c895dbba9da3e1c",
+        "scheme": "test-decision-v1",
+        "verifier_key_ref": "did:key:trusted-alpha",
+        "transport_hint": "relay_event",
+        "signature_valid": true,
+        "status": "active",
+        "valid_until": "2026-08-14T11:59:59Z"
+      },
+      "policy": {
+        "accepted_schemes": ["test-decision-v1"],
+        "authorized_keys": ["did:key:trusted-alpha"]
+      },
+      "expected_state": "expired"
+    },
+    {
+      "name": "revoked_evidence",
+      "consumed_text": "{\"approval\":\"fulfillment-approved\",\"decision\":\"D-1001\"}",
+      "evidence": {
+        "decision_ref": "decision:D-1001",
+        "authorization_uri": "https://example.test/decisions/D-1001",
+        "authorization_sha256": "917239554183f6a15b6178f0e26d4ba783ca90ae50762b286c895dbba9da3e1c",
+        "scheme": "test-decision-v1",
+        "verifier_key_ref": "did:key:trusted-alpha",
+        "transport_hint": "bundle",
+        "signature_valid": true,
+        "status": "revoked",
+        "valid_until": "2030-01-01T00:00:00Z"
+      },
+      "policy": {
+        "accepted_schemes": ["test-decision-v1"],
+        "authorized_keys": ["did:key:trusted-alpha"]
+      },
+      "expected_state": "revoked"
+    },
+    {
+      "name": "valid_but_zero_authority",
+      "consumed_text": "{\"approval\":\"fulfillment-approved\",\"decision\":\"D-1002\"}",
+      "evidence": {
+        "decision_ref": "decision:D-1002",
+        "authorization_uri": "https://example.test/decisions/D-1002",
+        "authorization_sha256": "cd7b500c5bb4298688548784eb7c655d5b86b7782a0e9ce2b88f3d798da8d7b0",
+        "scheme": "test-decision-v1",
+        "verifier_key_ref": "did:key:untrusted-beta",
+        "transport_hint": "other",
+        "signature_valid": true,
+        "status": "active",
+        "valid_until": "2030-01-01T00:00:00Z"
+      },
+      "policy": {
+        "accepted_schemes": ["test-decision-v1"],
+        "authorized_keys": ["did:key:trusted-alpha"]
+      },
+      "expected_state": "structurally_valid_zero_authority"
+    },
+    {
+      "name": "signature_invalid",
+      "consumed_text": "{\"approval\":\"fulfillment-approved\",\"decision\":\"D-1001\"}",
+      "evidence": {
+        "decision_ref": "decision:D-1001",
+        "authorization_uri": "https://example.test/decisions/D-1001",
+        "authorization_sha256": "917239554183f6a15b6178f0e26d4ba783ca90ae50762b286c895dbba9da3e1c",
+        "scheme": "test-decision-v1",
+        "verifier_key_ref": "did:key:trusted-alpha",
+        "transport_hint": "raw_url",
+        "signature_valid": false,
+        "status": "active",
+        "valid_until": "2030-01-01T00:00:00Z"
+      },
+      "policy": {
+        "accepted_schemes": ["test-decision-v1"],
+        "authorized_keys": ["did:key:trusted-alpha"]
+      },
+      "expected_state": "structurally_invalid"
+    }
+  ]
+}
