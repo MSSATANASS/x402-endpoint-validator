@@ -53,6 +53,8 @@ try:
 except ImportError:  # pragma: no cover - yaml is in image but stay defensive
     yaml = None  # type: ignore
 
+from authorization_evidence_report import audit_authorization_evidence
+
 from payment_required import (
     caip2_in_obj,
     check_bazaar_extension,
@@ -612,12 +614,17 @@ def validate_endpoint(
     api_key: str = "",
     probe_method: str = "auto",
     strict_v2: bool = False,
+    authorization_evidence_path: str = "",
 ) -> dict[str, Any]:
     log(f"validating {url}")
     reach = check_reachability(url)
     manifest = _check_manifest_cached(url)
     body = check_402_body(url, probe_method=probe_method, strict_v2=strict_v2)
     perf = check_p95(url, threshold_ms)
+    authorization_evidence = audit_authorization_evidence(
+        authorization_evidence_path,
+        now_utc=body.get("probed_at_utc") or _utc_now(),
+    )
     # A manifest defect is a HOST-level finding, reported via manifest_defect;
     # it no longer fails every endpoint of the host (audit N3-2). The endpoint
     # answers for its own behaviour only.
@@ -642,6 +649,7 @@ def validate_endpoint(
                 "status_code": body.get("status_code"),
                 "note": "HTTP 402 returned" if body.get("payment_required_passed") else "did not return 402",
             },
+            "authorization_evidence": authorization_evidence,
         },
     }
     if api_key:
@@ -722,6 +730,7 @@ def main() -> int:
     probe_method = (os.environ.get("X402V_PROBE_METHOD", "auto") or "auto").strip() or "auto"
     strict_v2_raw = (os.environ.get("X402V_STRICT_V2", "false") or "false").strip().lower()
     strict_v2 = strict_v2_raw in ("1", "true", "yes", "on")
+    authorization_evidence_path = os.environ.get("X402V_AUTHORIZATION_EVIDENCE_PATH", "").strip()
 
     if tier == "pro" and not pro_key:
         log("tier=pro requires pro-license-key — falling back to free tier")
@@ -739,7 +748,9 @@ def main() -> int:
 
     log(
         f"tier={tier}, threshold_p95_ms={threshold_ms}, endpoints={len(urls)}, "
-        f"probe_method={probe_method}, strict_v2={strict_v2}, enhanced={'on' if api_key else 'off'}"
+        f"probe_method={probe_method}, strict_v2={strict_v2}, "
+        f"auth_audit={'on' if authorization_evidence_path else 'off'}, "
+        f"enhanced={'on' if api_key else 'off'}"
     )
 
     results = [
@@ -749,6 +760,7 @@ def main() -> int:
             api_key,
             probe_method=probe_method,
             strict_v2=strict_v2,
+            authorization_evidence_path=authorization_evidence_path,
         )
         for u in urls
     ]
@@ -764,6 +776,7 @@ def main() -> int:
         "validator_version": "1.2.0",
         "probe_method": probe_method,
         "strict_v2": strict_v2,
+        "authorization_evidence_enabled": bool(authorization_evidence_path),
     }
     report = {"summary": summary, "endpoints": results}
 

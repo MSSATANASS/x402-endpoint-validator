@@ -11,6 +11,7 @@
 #   $7 fail-on (any | critical | never)
 #   $8 probe-method (auto | GET | POST)
 #   $9 strict-v2 (true | false)
+#   $10 authorization-evidence-path (workspace-relative JSON bundle; optional)
 #
 # Output contract: writes "report-path", "pass-fail", "endpoints-checked"
 # and "failures" to $GITHUB_OUTPUT when present, then exits with the code
@@ -27,6 +28,7 @@ REPORT_PATH="${6:-x402-validator-report.json}"
 FAIL_ON="${7:-any}"
 PROBE_METHOD="${8:-auto}"
 STRICT_V2="${9:-false}"
+AUTHORIZATION_EVIDENCE_PATH="${10:-}"
 
 if [[ -z "${ENDPOINTS_RAW}" ]]; then
   echo "::error::Input 'endpoints' is required" >&2
@@ -54,6 +56,7 @@ export X402V_REPORT_PATH="${REPORT_PATH}"
 export X402V_FAIL_ON="${FAIL_ON}"
 export X402V_PROBE_METHOD="${PROBE_METHOD}"
 export X402V_STRICT_V2="${STRICT_V2}"
+export X402V_AUTHORIZATION_EVIDENCE_PATH="${AUTHORIZATION_EVIDENCE_PATH}"
 export X402V_WORKSPACE="${WORKSPACE}"
 
 python3 /action/validator.py

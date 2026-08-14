@@ -62,6 +62,11 @@ Output now includes `reputation_score`, `wash_flag`, `facilitator_mediated`, `on
 | `fail-on` | no | `any` | `any` = fail on any check failure. `critical` = fail only on manifest/402 conformance issues. `never` = report-only, never fails the workflow. |
 | `probe-method` | no | `auto` | Probe method for the unauthenticated payment-required check: `auto` tries GET then POST; `GET` or `POST` forces one method. |
 | `strict-v2` | no | `false` | Opt into the strict-v2 contract: reproducible v2 verdicts, fresh probe timestamping, raw response archive, and body-only legacy placement as a strict failure. |
+| `authorization-evidence-path` | no | `''` | Optional workspace-relative JSON bundle for the report-only Authorization Lifecycle Audit. It never changes endpoint pass/fail or CI exit codes. |
+
+### Authorization Lifecycle Audit
+
+When `authorization-evidence-path` is set, the validator classifies the local evidence bundle and adds `checks.authorization_evidence` to each endpoint report. The field is explicitly report-only: `blocking` is always `false`, and the existing endpoint `passed`, summary, and exit-code logic are unchanged. See `docs/authorization-lifecycle-audit-api.md`.
 
 ### Strict-v2 mode
 

@@ -46,6 +46,10 @@ inputs:
     description: 'Enable strict x402 v2 mode. Body-only legacy placement fails under strict mode.'
     required: false
     default: 'false'
+  authorization-evidence-path:
+    description: 'Optional workspace-relative JSON bundle for the report-only Authorization Lifecycle Audit.'
+    required: false
+    default: ''
   api-key:
     description: 'SmartFlow Mapper API key (optional, unlocks enhanced features: wash detection, reputation history, operator farm flags). Get yours at https://hypersub.xyz/s/smartflow-scorecard'
     required: false
@@ -76,3 +80,4 @@ runs:
     - ${{ inputs.fail-on }}
     - ${{ inputs.probe-method }}
     - ${{ inputs.strict-v2 }}
+    - ${{ inputs.authorization-evidence-path }}
