@@ -1,6 +1,6 @@
 name: 'x402 Endpoint Compliance Validator'
 description: 'Validate x402 endpoint compliance: reachability, manifest, 402 body, response time, payment-required behavior.'
-author: 'SmartFlow'
+author: 'MSSATANASS'
 branding:
   icon: 'shield'
   color: 'blue'
@@ -23,7 +23,7 @@ inputs:
     required: false
     default: 'free'
   pro-license-key:
-    description: 'Required when tier=pro. Issued at https://smartflowproai.com/atlas.'
+    description: 'Optional license value for deployments that enable pro features.'
     required: false
     default: ''
   webhook-url:
@@ -51,7 +51,7 @@ inputs:
     required: false
     default: ''
   api-key:
-    description: 'SmartFlow Mapper API key (optional, unlocks enhanced features: wash detection, reputation history, operator farm flags). Get yours at https://hypersub.xyz/s/smartflow-scorecard'
+    description: 'Optional telemetry key for deployments that enable enhanced endpoint metadata.'
     required: false
     default: ''
 

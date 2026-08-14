@@ -31,8 +31,8 @@ The action writes the JSON report to `report-path` and exposes its pass/fail out
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Action](https://img.shields.io/badge/GitHub_Action-v1-2088FF?logo=githubactions&logoColor=white)](https://github.com/marketplace/actions/x402-endpoint-validator)
-[![Maintained 2026](https://img.shields.io/badge/Maintained-2026-brightgreen)](https://github.com/smartflowproai-lang)
-[![x402 compatible](https://img.shields.io/badge/x402-compatible-purple)](https://smartflowproai.com)
+[![Maintained 2026](https://img.shields.io/badge/Maintained-2026-brightgreen)](https://github.com/MSSATANASS/x402-endpoint-validator)
+[![x402 compatible](https://img.shields.io/badge/x402-compatible-purple)](https://github.com/MSSATANASS/x402-endpoint-validator)
 
 A CI-native validator for x402 endpoints. Drops into any GitHub workflow, hits your endpoint with a real probe, reads the `402 Payment Required` quote against the x402 spec, and fails the build when the manifest drifts, the response budget breaks, or the well-known shape stops conforming.
 
@@ -50,31 +50,16 @@ Out of the box, the Action runs **5 compliance checks**:
 - Payment-required behavior
 
 ```yaml
-- uses: smartflowproai-lang/x402-endpoint-validator@v1.0.1
+- uses: MSSATANASS/x402-endpoint-validator@v1
   with:
     endpoints: |
       https://api.example.com
       https://other.com/api
 ```
 
-## Paid Tier (with `api-key`)
+## Optional telemetry inputs
 
-Get an API key from [hypersub.xyz/s/smartflow-scorecard](https://hypersub.xyz/s/smartflow-scorecard) ($15-$4999/mo).
-
-Unlocks **enhanced intel per endpoint**:
-- **Wash detection** — flag operator farms self-routing payments
-- **Reputation score** — 0.0–1.0 based on 60-day behavioral history
-- **Facilitator classification** — CDP-mediated vs P2P vs other
-- **On-chain volume 30d** — USDC throughput tracked from our payments index
-
-```yaml
-- uses: smartflowproai-lang/x402-endpoint-validator@v1.0.1
-  with:
-    endpoints: ${{ github.event.repository.html_url }}
-    api-key: ${{ secrets.SMARTFLOW_KEY }}
-```
-
-Output now includes `reputation_score`, `wash_flag`, `facilitator_mediated`, `on_chain_volume_30d` per endpoint.
+The validator's core conformance checks do not require an API key. Deployments that provide optional telemetry may expose `api-key`, `tier`, `pro-license-key`, or `webhook-url`; configure those values only through the provider contract for your deployment and keep secrets in GitHub Actions secrets.
 
 ---
 
@@ -85,9 +70,10 @@ Output now includes `reputation_score`, `wash_flag`, `facilitator_mediated`, `on
 | `endpoints` | yes | — | Single URL, inline JSON array (`'["https://a/x","https://b/y"]'`), or a workspace-relative path to a YAML/JSON config file. |
 | `threshold-p95` | no | `1000` | P95 response time in milliseconds. Any endpoint above this fails the latency check. |
 | `tier` | no | `free` | `free` for public repos. `pro` unlocks webhooks, trend tracking, custom thresholds, private-repo support. |
-| `pro-license-key` | no | `''` | Required when `tier=pro`. Issued at smartflowproai.com/atlas. |
-| `webhook-url` | no | `''` | Slack or Teams webhook for per-run notifications. Pro tier only. |
+| `pro-license-key` | no | `''` | Optional license value for deployments that enable pro features. |
+| `webhook-url` | no | `''` | Optional Slack or Teams webhook for deployments that enable notifications. |
 | `report-path` | no | `x402-validator-report.json` | Where the JSON report lands inside the workspace. Upload it as an artifact if you want history. |
+| `api-key` | no | `''` | Optional telemetry key for deployments that enable enhanced endpoint metadata. |
 | `fail-on` | no | `any` | `any` = fail on any check failure. `critical` = fail only on manifest/402 conformance issues. `never` = report-only, never fails the workflow. |
 | `probe-method` | no | `auto` | Probe method for the unauthenticated payment-required check: `auto` tries GET then POST; `GET` or `POST` forces one method. |
 | `strict-v2` | no | `false` | Opt into the strict-v2 contract: reproducible v2 verdicts, fresh probe timestamping, raw response archive, and body-only legacy placement as a strict failure. |
@@ -170,7 +156,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: smartflowproai-lang/x402-endpoint-validator@v1
+      - uses: MSSATANASS/x402-endpoint-validator@v1
         with:
           endpoints: 'https://api.yourdomain.com/v1/data'
 ```
@@ -192,7 +178,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: x402
-        uses: smartflowproai-lang/x402-endpoint-validator@v1
+        uses: MSSATANASS/x402-endpoint-validator@v1
         with:
           endpoints: '.github/x402-endpoints.yml'
           threshold-p95: '750'
@@ -263,7 +249,7 @@ jobs:
           - https://api.yourdomain.com/v1/signals
           - https://api.yourdomain.com/v1/snapshot
     steps:
-      - uses: smartflowproai-lang/x402-endpoint-validator@v1
+      - uses: MSSATANASS/x402-endpoint-validator@v1
         with:
           endpoints: ${{ matrix.endpoint }}
           threshold-p95: '1000'
@@ -286,33 +272,28 @@ This Action is the conformance test. It speaks the spec, probes like a real agen
 
 ---
 
-## Tiers
+## Validation modes
 
-**Free** — public-repo defaults. All five validation layers. Single-endpoint or matrix. JSON report. Use it forever, no key required.
+**Free** — public-repository defaults with all five validation layers, single-endpoint or matrix mode, and a JSON report. No key is required for core conformance checks.
 
-**Paid (Mapper API key)** — pass `api-key` to unlock enhanced per-endpoint intel: wash detection, reputation history, facilitator classification, on-chain 30d volume. Tiers run from Insider ($15/mo) up to Enterprise ($4,999/mo). Subscribe at [hypersub.xyz/s/smartflow-scorecard](https://hypersub.xyz/s/smartflow-scorecard).
-
-You never need a key for normal CI conformance. The key exists for teams that want the underlying Mapper telemetry surfaced inline with their validation runs.
+**Report-only** — set `fail-on: 'never'` when you want findings written to the report without failing the workflow. The optional authorization evidence input is always report-only and does not change endpoint pass/fail or CI exit codes.
 
 ---
 
 ## Maintainer
 
-Built and maintained by **Tom Smart** ([@TomSmart_ai](https://twitter.com/TomSmart_ai)).
+Built and maintained in the [MSSATANASS/x402-endpoint-validator](https://github.com/MSSATANASS/x402-endpoint-validator) repository.
 
-- **Site:** [smartflowproai.com](https://smartflowproai.com)
-- **Mapper API:** [smartflowproai.com/catalog](https://smartflowproai.com/catalog) — live index of x402 endpoints across Base + Ethereum.
-- **Substack:** [smartflowproai.substack.com](https://smartflowproai.substack.com) — weekly x402 telemetry and methodology notes.
-- **GitHub:** [github.com/smartflowproai-lang](https://github.com/smartflowproai-lang)
-
-If you ship x402 endpoints, ping me on X. I keep a running list of endpoints that pass conformance and feature them in the weekly snapshot.
+- **Marketplace:** [x402 Endpoint Compliance Validator](https://github.com/marketplace/actions/x402-endpoint-compliance-validator)
+- **Issues:** [GitHub Issues](https://github.com/MSSATANASS/x402-endpoint-validator/issues)
+- **Source:** [GitHub repository](https://github.com/MSSATANASS/x402-endpoint-validator)
 
 ---
 
 ## Community + contributing
 
-- **Issues:** [github.com/smartflowproai-lang/x402-endpoint-validator/issues](https://github.com/smartflowproai-lang/x402-endpoint-validator/issues)
-- **Discord:** drop into the SmartFlow channel via [smartflowproai.com/discord](https://smartflowproai.com/discord) if you want async support
+- **Issues:** [GitHub Issues](https://github.com/MSSATANASS/x402-endpoint-validator/issues)
+- **Discussions:** use the repository discussions or issues for technical feedback
 - **PRs welcome:** see `CONTRIBUTING.md` for the test harness setup. New scheme support (beyond `exact`) is the top contribution area right now.
 
 If you find a real-world x402 endpoint that the validator gets wrong, open an issue with the URL and the response body — those bug reports are the most useful thing you can send.
@@ -344,7 +325,7 @@ So the validator dependency tree (Python + httpx + jsonschema) lives in the imag
 
 ## License
 
-MIT © 2026 Tom Smart. See `LICENSE`.
+MIT © 2026 MSSATANASS. See `LICENSE`.
 
 ---
 
