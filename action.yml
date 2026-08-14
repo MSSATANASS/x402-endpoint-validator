@@ -1,4 +1,4 @@
-name: 'x402 Endpoint Validator'
+name: 'x402 Endpoint Compliance Validator'
 description: 'Validate x402 endpoint compliance: reachability, manifest, 402 body, response time, payment-required behavior.'
 author: 'SmartFlow'
 branding:
