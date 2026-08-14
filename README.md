@@ -1,3 +1,32 @@
+## Quick start
+
+Create `.github/workflows/x402-validate.yml` with this workflow. Replace the example endpoint with the x402 endpoint you want to validate:
+
+```yaml
+name: x402 validate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate x402 endpoint
+        uses: MSSATANASS/x402-endpoint-validator@v1
+        with:
+          endpoints: '["https://api.example.com/x402"]'
+          threshold-p95: '750'
+          fail-on: 'critical'
+          report-path: 'x402-report.json'
+```
+
+The action writes the JSON report to `report-path` and exposes its pass/fail output for subsequent workflow steps.
 # x402 Endpoint Validator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
