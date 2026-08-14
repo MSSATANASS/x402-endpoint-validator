@@ -22,4 +22,7 @@ COPY entrypoint.sh /action/entrypoint.sh
 
 RUN chmod +x /action/entrypoint.sh /action/validator.py
 
+RUN useradd -U -u 1000 appuser && chown -R 1000:1000 /action
+USER 1000
+
 ENTRYPOINT ["/action/entrypoint.sh"]
